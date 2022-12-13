@@ -1,95 +1,81 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import './todo-list-item.css'
 import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
 
-export default class TodoListItem extends React.Component {
-  state = {
-    done: false,
-    labelInp: this.props.label,
-    min: this.props.minValue,
-    sec: this.props.secValue,
-    isCounting: false,
-  }
-  componentWillUnmount() {
-    clearInterval(this.counterID)
-  }
-  changeValue = (e) => {
-    this.setState({
-      labelInp: e.target.value,
-    })
-  }
 
-  onSubmitInput = (e) => {
-    e.preventDefault()
-    if (this.state.labelInp !== '') {
-      this.props.onItemChange(this.state.labelInp)
-    }
-  }
-  minDecrement = () => {
-    const { min } = this.state
-    this.setState({
-      min: min - 1,
-      sec: 59,
-    })
-  }
-  secDecrement = () => {
-    const { min, sec, isCounting } = this.state
-
-    if (min === 0 && sec === 0 && isCounting === true) {
-      clearInterval(this.counterID)
-      this.setState({
-        isCounting: false,
-      })
-    }
-    if (sec > 0) {
-      this.setState({
-        sec: sec - 1,
-        isCounting: true,
-      })
-    } else {
-      this.minDecrement()
-    }
-  }
-  handlePause = (event) => {
-    event.stopPropagation()
-    this.setState({ isCounting: false })
-    clearInterval(this.counterID)
-  }
-
-  handleStart = (event) => {
-    event.stopPropagation()
-    this.setState({ isCounting: true })
-    this.counterID = setInterval(() => {
-      this.secDecrement()
-    }, 1000)
-  }
-  render() {
-    const { min, sec, isCounting } = this.state
-    const {
-      label,
-      idFor,
-      onDeleted,
-      onToggleDone,
-      done,
-      editer,
-      createTime,
-      toggleEditer,
-      curFilter,
-    } = this.props
-
-    let classNames = 'title'
+const TodoListItem=({curFilter,editer,idFor,onToggleDone,minValue,secValue,onDeleted,toggleEditer,onItemChange,label,done,createTime})=>{
+	
+	
+	
+	const[isCounting,setIsCounting]=useState(false)
+	const[min,setMin]=useState(minValue)
+	const[sec,setSec]=useState(secValue)
+	const[labelInp,setLabelInp]=useState(label)
+	useEffect(()=>{
+		const interval=setInterval(()=>{
+			
+			isCounting && secDecrement()
+			
+			
+			 
+		},1000)
+		return ()=>{
+			clearInterval(interval)
+		}
+	},[isCounting])
+	let classNames = 'title'
 
     if (done) {
       classNames += ' done'
     }
-    const buttons = !isCounting ? (
-      <button className="icon icon-play" onClick={this.handleStart}></button>
+		
+		const changeValue=(e)=>{
+			
+			setLabelInp(e.target.value)
+			
+		}
+		
+		 
+		const onSubmitInput = (e) => {
+			e.preventDefault()
+			if (labelInp !== '') {
+				onItemChange(labelInp)
+			}
+		}
+		const minDecrement = () => {
+		
+			setMin((min)=>min>=1?min-1:stopMin())
+			setSec(59)
+		
+const stopMin=()=>{
+	setIsCounting(false)
+	setMin(0)
+	setSec(0)
+}
+		
+		}
+		const secDecrement = () => {
+				if (min === 0 && sec === 0 && isCounting === true) {
+					setIsCounting(false)
+				}
+				if (sec > 0) {
+					setSec((sec)=>sec>=1?sec-1:minDecrement())
+				} 
+		}
+		const handlePause = (event) => {
+			setIsCounting(false)
+		}
+		const handleStart = (event) => {
+			setIsCounting(true)	
+		}
+		const buttons = !isCounting ? (
+      <button className="icon icon-play"onClick={handleStart} ></button>
     ) : (
-      <button className="icon icon-pause" onClick={this.handlePause}></button>
+      <button className="icon icon-pause" onClick={handlePause}></button>
     )
-    return (
-      <>
+	return (
+		<>
         <div
           hidden={
             (done && curFilter === 'Active') ||
@@ -97,12 +83,12 @@ export default class TodoListItem extends React.Component {
           }
         >
           {editer ? (
-            <form onSubmit={this.onSubmitInput}>
+            <form onSubmit={onSubmitInput}>
               <input
                 type="text"
                 className="edit"
-                value={this.state.labelInp}
-                onChange={this.changeValue}
+                value={labelInp}
+                onChange={changeValue}
               />
             </form>
           ) : (
@@ -133,8 +119,7 @@ export default class TodoListItem extends React.Component {
           )}
         </div>
       </>
-    )
-  }
+	)
 }
 TodoListItem.defaultProps = {
   curFilter: 'All',
@@ -163,3 +148,4 @@ TodoListItem.propTypes = {
   editer: PropTypes.bool,
   onItemChange: PropTypes.func,
 }
+export default TodoListItem

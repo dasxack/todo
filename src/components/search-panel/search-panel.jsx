@@ -1,72 +1,74 @@
-import React from 'react';
+import React ,{useState}from 'react';
 import './search-panel.css';
 import PropTypes from 'prop-types';
-export default class SearchPanel extends React.Component {
-  state = {
-    label: '',
-    minValue: '',
-    secValue: '',
+const SearchPanel=({onItemAdded})=>{
+	const[label,setLabel]=useState('')
+	const[minValue,setMinValue]=useState('')
+	const[secValue,setSecValue]=useState('')
+	const onLabelChange = (e) => {
+		if(e.target.name==='label'){
+			setLabel(e.target.value)
+		}
+		if(e.target.name==='minValue'){
+			setMinValue(e.target.value)
+		}
+		if(e.target.name==='secValue'){
+			setSecValue(e.target.value)
+		}
+		
   };
 
-  onLabelChange = (e) => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  onSubmit = (e) => {
-    const { label, minValue, secValue } = this.state;
+	
+	const onSubmit = (e) => {
+    
     const trimDescription = label.replace(/ +/g, ' ').trim();
     if (e.key === 'Enter') {
       if (trimDescription === '') {
-        this.props.onItemAdded('Нет Задачи', minValue, secValue);
+        onItemAdded('Нет Задачи', minValue, secValue);
       } else {
-        this.props.onItemAdded(label, minValue, secValue);
+        onItemAdded(label, minValue, secValue);
       }
-      this.setState({
-        label: '',
-        minValue: '',
-        secValue: '',
-      });
+      setLabel('')
+			setMinValue('')
+			setSecValue('')
     }
+		
   };
-
-  render() {
-    return (
-      <form className="new-todo-form" onKeyDown={this.onSubmit}>
-        <input
-          type="text"
-          className="new-todo"
-          name="label"
-          placeholder="What needs to be done?"
-          autoFocus
-          onChange={this.onLabelChange}
-          value={this.state.label}
-        />
-        <input
-          type="text"
-          className="new-todo-form__timer"
-          name="minValue"
-          placeholder="Min"
-          onChange={this.onLabelChange}
-          value={this.state.minValue}
-        />
-        <input
-          type="text"
-          className="new-todo-form__timer"
-          name="secValue"
-          placeholder="Sec"
-          onChange={this.onLabelChange}
-          value={this.state.secValue}
-        />
-      </form>
-    );
-  }
+	return (
+		<form className="new-todo-form"  onKeyDown={onSubmit}>
+			<input
+				type="text"
+				className="new-todo"
+				name="label"
+				placeholder="What needs to be done?"
+				autoFocus
+				onChange={onLabelChange}
+				value={label}
+				
+			/>
+			<input
+				type="text"
+				className="new-todo-form__timer"
+				name="minValue"
+				placeholder="Min"
+				value={minValue}
+				onChange={onLabelChange}
+			/>
+			<input
+				type="text"
+				className="new-todo-form__timer"
+				name="secValue"
+				placeholder="Sec"
+				onChange={onLabelChange}
+				value={secValue}
+			/>
+		</form>
+	);
 }
-
 SearchPanel.defaultProps = {
   onItemAdded: () => {},
 };
 SearchPanel.propTypes = {
   onItemAdded: PropTypes.func,
 };
+export default SearchPanel
